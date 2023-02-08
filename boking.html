@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        let events = localStorage.getItem("events")
+          ? JSON.parse(localStorage.getItem("events"))
+          : [];
+        $('#calendar').fullCalendar({
+          header: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'month,agendaWeek,agendaDay'
+          },
+          defaultView: 'agendaWeek',
+          selectable: true,
+          slotDuration: '00:60:00',
+          minTime: '08:00:00',
+          maxTime: '17:00:00',
+          select: function(start, end, jsEvent, view, resource) {
+            var title = prompt("Enter your name:");
+            if (title) {
+              $('#calendar').fullCalendar('renderEvent', {
+                title: title,
+                start: start,
+                end: end,
+                allDay: false
+              }, true);
+              events.push({
+                title: title,
+                start: start.format(),
+                end: end.format()
+              });
+              localStorage.setItem("events", JSON.stringify(events));
+            }
+            $('#calendar').fullCalendar('unselect');
+          },
+          eventClick: function(event, jsEvent, view) {
+            if (confirm("Confirm cancelling booking for " + event.title + "?")) {
+              $('#calendar').fullCalendar('removeEvents', event._id);
+              let index = events.findIndex(x => x.title === event.title);
+              events.splice(index, 1);
+              localStorage.setItem("events", JSON.stringify(events));
+            }
+          },
+          events: events
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div id="calendar"></div>
+  </body>
+</html>
